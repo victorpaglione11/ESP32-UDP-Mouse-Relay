@@ -14,7 +14,7 @@ Adafruit_NeoPixel pixel(1, RGB_LED_PIN, NEO_RGB + NEO_KHZ800);
 WiFiUDP udp;
 USBHIDMouse Mouse;
 
-struct __attribute__((packed)) MousePacket 
+struct __attribute__((packed)) MousePacket
 {
     int16_t dx;
     int16_t dy;
@@ -22,7 +22,7 @@ struct __attribute__((packed)) MousePacket
     uint8_t buttons;
 };
 
-const uint8_t BUTTON_MAP[] = 
+const uint8_t BUTTON_MAP[] =
 {
     MOUSE_LEFT,
     MOUSE_RIGHT,
@@ -31,41 +31,41 @@ const uint8_t BUTTON_MAP[] =
     MOUSE_FORWARD
 };
 
-void setLedColor(uint32_t color) 
+void setLedColor(uint32_t color)
 {
     pixel.setPixelColor(0, color);
     pixel.show();
 }
 
-void udpTask(void* pvParameters) 
+void udpTask(void* pvParameters)
 {
     MousePacket packet;
     uint8_t lastButtons = 0;
 
-    while (true) 
+    while (true)
     {
-        if (udp.parsePacket() == sizeof(packet)) 
+        if (udp.parsePacket() == sizeof(packet))
         {
             udp.read((uint8_t*)&packet, sizeof(packet));
 
-            if (packet.dx || packet.dy || packet.scroll) 
+            if (packet.dx || packet.dy || packet.scroll)
             {
                 Mouse.move(packet.dx, packet.dy, packet.scroll);
             }
 
             uint8_t changed = lastButtons ^ packet.buttons;
-            if (changed) 
+            if (changed)
             {
-                for (int i = 0; i < 5; i++) 
+                for (int i = 0; i < 5; i++)
                 {
                     uint8_t mask = (1 << i);
-                    if (changed & mask) 
+                    if (changed & mask)
                     {
-                        if (packet.buttons & mask) 
+                        if (packet.buttons & mask)
                         {
                             Mouse.press(BUTTON_MAP[i]);
                         }
-                        else 
+                        else
                         {
                             Mouse.release(BUTTON_MAP[i]);
                         }
@@ -78,7 +78,7 @@ void udpTask(void* pvParameters)
     }
 }
 
-void setup() 
+void setup()
 {
     pixel.begin();
     setLedColor(0);
@@ -86,7 +86,7 @@ void setup()
     Serial.begin(115200);
     WiFi.begin(SSID_WIFI, PASS_WIFI);
 
-    while (WiFi.status() != WL_CONNECTED) 
+    while (WiFi.status() != WL_CONNECTED)
     {
         setLedColor(pixel.Color(0, 0, 255));
         vTaskDelay(pdMS_TO_TICKS(250));
@@ -106,7 +106,7 @@ void setup()
     xTaskCreatePinnedToCore(udpTask, "udp", 4096, NULL, 5, NULL, 1);
 }
 
-void loop() 
+void loop()
 {
     vTaskDelay(portMAX_DELAY);
 }
