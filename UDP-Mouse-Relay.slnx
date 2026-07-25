@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="UDP-Mouse-Relay/UDP-Mouse-Relay.vcxproj" />
+</Solution>
